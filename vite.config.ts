@@ -35,9 +35,4 @@ export default defineConfig(({ mode }) => {
         }
       })
     ],
-    define: {
-      // Your existing API key logic remains untouched
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || process.env.API_KEY || '')
-    }
-  };
 });
