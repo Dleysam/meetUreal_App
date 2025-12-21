@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AppScreen, CurrentUser, MainTab, User, ChatMessage } from './types';
 import { verifyUserPhoto } from './services/geminiService';
 import { Button, Input, Logo, Select, TextArea } from './components/UI';
+import { auth, db } from './services/firebase';
 import { 
   MapPin, Star, MessageCircle, User as UserIcon, 
   Home, Heart, X, Check, Lock, ChevronLeft,
