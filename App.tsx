@@ -3,6 +3,7 @@ import { AppScreen, CurrentUser, MainTab, User, ChatMessage } from './types';
 import { verifyUserPhoto } from './services/geminiService';
 import { Button, Input, Logo, Select, TextArea } from './components/UI';
 import { auth, db } from './services/firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { 
   MapPin, Star, MessageCircle, User as UserIcon, 
   Home, Heart, X, Check, Lock, ChevronLeft,
@@ -191,23 +192,75 @@ export default function App() {
 
   // --- HANDLERS ---
 
-  const handleInstallApp = async () => {
-    vibrate(10);
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setInstallPrompt(null);
-    }
-  };
-
-  const handleLogin = (email: string) => {
+    const handleLogin = async (email: string, password?: string) => {
     vibrate(10);
     if (bannedEmails.has(email)) {
       alert("This account has been banned due to failed verification.");
       return;
     }
-    setIsNewUser(false);
+
+    try {
+      // Authenticate the user securely via Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password || "meetUreal123!");
+      const firebaseUser = userCredential.user;
+
+      setIsNewUser(false);
+      setCurrentUser(prev => ({ 
+        ...prev, 
+        email: firebaseUser.email || email,
+        id: firebaseUser.uid, // Tie your local state to the unique Firebase UID
+        name: 'Alex Doe', 
+        age: 25,
+        isVerified: true, 
+        occupation: 'Software Engineer',
+        gender: 'Male',
+        ethnicity: 'Mixed',
+        height: '180',
+        bodyType: 'Athletic',
+        relationshipStatus: 'Single',
+        lookingFor: ['Relationship'],
+        about: "I love coding, coffee, and long walks on the beach. Looking for someone genuine.",
+        imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
+        photos: [
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80', 
+          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80'
+        ]
+      }));
+      setCurrentScreen(AppScreen.LOCATION);
+
+    } catch (error: any) {
+      alert("Invalid email or password. Please try again.");
+    }
+  };
+
+  const handleRegister = async (email: string, password?: string) => {
+    vibrate(10);
+    if (bannedEmails.has(email)) {
+      alert("This email is blocked due to fake account activity.");
+      return;
+    }
+
+    try {
+      // Create a brand new record securely inside your Firebase Authentication tab
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password || "meetUreal123!");
+      const firebaseUser = userCredential.user;
+
+      setIsNewUser(true);
+      setCurrentUser(prev => ({ 
+        ...prev, 
+        email: firebaseUser.email || email, 
+        id: firebaseUser.uid 
+      }));
+      setCurrentScreen(AppScreen.PROFILE_SETUP);
+
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        alert("This email is already registered. Please sign in.");
+      } else {
+        alert(`Registration failed: ${error.message}`);
+      }
+    }
+  };
     // Simulating login fetch
     setCurrentUser(prev => ({ 
       ...prev, 
