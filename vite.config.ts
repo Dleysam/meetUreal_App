@@ -34,8 +34,6 @@ export default defineConfig(({ mode }) => {
           ]
         }
       })
-    ],
-  }; // <--- Fixed: Added missing closing curly brace for the return block
-});  // <--- Fixed: Properly closing the defineConfig arrow function
-    ],
+    ]
+  };
 });
