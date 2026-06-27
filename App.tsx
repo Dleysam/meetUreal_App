@@ -254,6 +254,67 @@ export default function App() {
       setCurrentScreen(AppScreen.PROFILE_SETUP);
 
     } catch (error: any) {
+  // --- HANDLERS ---
+  const handleLogin = async (email: string, password?: string) => {
+    vibrate(10);
+    if (bannedEmails.has(email)) {
+      alert("This account has been banned due to failed verification.");
+      return;
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password || "meetUreal123!");
+      const firebaseUser = userCredential.user;
+
+      setIsNewUser(false);
+      setCurrentUser(prev => ({ 
+        ...prev, 
+        email: firebaseUser.email || email,
+        id: firebaseUser.uid, 
+        name: 'Alex Doe', 
+        age: 25,
+        isVerified: true, 
+        occupation: 'Software Engineer',
+        gender: 'Male',
+        ethnicity: 'Mixed',
+        height: '180',
+        bodyType: 'Athletic',
+        relationshipStatus: 'Single',
+        lookingFor: ['Relationship'],
+        about: "I love coding, coffee, and long walks on the beach. Looking for someone genuine.",
+        imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
+        photos: [
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80', 
+          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80'
+        ]
+      }));
+      setCurrentScreen(AppScreen.LOCATION);
+
+    } catch (error: any) {
+      alert("Invalid email or password. Please try again.");
+    }
+  };
+
+  const handleRegister = async (email: string, password?: string) => {
+    vibrate(10);
+    if (bannedEmails.has(email)) {
+      alert("This email is blocked due to fake account activity.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password || "meetUreal123!");
+      const firebaseUser = userCredential.user;
+
+      setIsNewUser(true);
+      setCurrentUser(prev => ({ 
+        ...prev, 
+        email: firebaseUser.email || email, 
+        id: firebaseUser.uid 
+      }));
+      setCurrentScreen(AppScreen.PROFILE_SETUP);
+
+    } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
         alert("This email is already registered. Please sign in.");
       } else {
@@ -261,43 +322,6 @@ export default function App() {
       }
     }
   };
-    // Simulating login fetch
-    setCurrentUser(prev => ({ 
-      ...prev, 
-      email, 
-      name: 'Alex Doe', 
-      age: 25,
-      isVerified: true, 
-      occupation: 'Software Engineer',
-      gender: 'Male',
-      ethnicity: 'Mixed',
-      height: '180',
-      bodyType: 'Athletic',
-      relationshipStatus: 'Single',
-      lookingFor: ['Relationship'],
-      about: "I love coding, coffee, and long walks on the beach. Looking for someone genuine.",
-      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80',
-      photos: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&q=80']
-    }));
-    setCurrentScreen(AppScreen.LOCATION);
-  };
-
-  const handleRegister = (email: string) => {
-    vibrate(10);
-    if (bannedEmails.has(email)) {
-      alert("This email is blocked due to fake account activity.");
-      return;
-    }
-    if (registeredEmails.has(email)) {
-      alert("This email is already registered. Please sign in.");
-      return;
-    }
-
-    setIsNewUser(true);
-    setCurrentUser(prev => ({ ...prev, email }));
-    setCurrentScreen(AppScreen.PROFILE_SETUP);
-  };
-
   const handleProfileComplete = (profileData: Partial<User>) => {
     vibrate(10);
     setCurrentUser(prev => ({ ...prev, ...profileData }));
